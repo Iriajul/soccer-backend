@@ -1,0 +1,64 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# PRODUCTION (VPS, co-hosted behind the EXISTING Athlon-go nginx).
+#
+# This app brings NO nginx of its own — it exposes `web` on the shared Docker
+# network that the existing nginx already lives on, and you add one upstream +
+# server block to that nginx (see DEPLOYMENT.md). Postgres stays private on an
+# internal network; no host ports are published.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+# ═══════════════════════════════════════════════════════════════════════════
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-soccer}
+      POSTGRES_USER:     ${POSTGRES_USER:-soccer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-soccer}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - soccer_internal
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: soccer-backend:latest
+    restart: always
+    env_file:
+      - .env                     # written by the deploy workflow from GH secrets
+    expose:
+      - "3000"                   # reachable by the shared nginx, NOT the host
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - storage_data:/app/storage
+    networks:
+      soccer_internal:
+      edge:
+        aliases:
+          - soccer-api           # nginx proxies to http://soccer-api:3000
+
+networks:
+  soccer_internal:
+    driver: bridge
+  edge:
+    external: true
+    # The existing nginx's network. Default assumes Athlon-go's compose
+    # (project "athlon-go", network "athlongo_network"). Verify on the VPS with
+    # `docker network ls` and override via PROXY_NETWORK in .env if different.
+    name: ${PROXY_NETWORK:-athlon-go_athlongo_network}
+
+volumes:
+  postgres_data:
+  storage_data:
