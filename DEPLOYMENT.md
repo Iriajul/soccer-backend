@@ -97,7 +97,7 @@ Run **once**, into the fresh DB, before real traffic:
 cd $VPS_APP_DIR
 docker compose -f docker-compose.prod.yml run --rm \
   -e MONGODB_URI="<your production mongo URI>" \
-  web python manage.py migrate_from_mongo
+  soccerweb python manage.py migrate_from_mongo --flush
 ```
 
 Preserves every `_id`, keeps bcrypt logins working, and is safe to re-run

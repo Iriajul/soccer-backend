@@ -1,16 +1,21 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # PRODUCTION (VPS, co-hosted behind the EXISTING Athlon-go nginx).
 #
-# This app brings NO nginx of its own — it exposes `web` on the shared Docker
-# network that the existing nginx already lives on, and you add one upstream +
-# server block to that nginx (see DEPLOYMENT.md). Postgres stays private on an
-# internal network; no host ports are published.
+# This app brings NO nginx of its own — it exposes `soccerweb` on the shared
+# Docker network that the existing nginx already lives on, and you add one
+# upstream + server block to that nginx (see DEPLOYMENT.md). Postgres stays
+# private on an internal network; no host ports are published.
+#
+# IMPORTANT: services are named `soccerweb` / `soccerdb` (NOT the generic
+# `web` / `db`) to avoid colliding with Athlon-go's own `web`/`db` services on
+# the shared `edge` network — a collision routes DB traffic to the wrong
+# Postgres and can disrupt Athlon-go. Do not rename them back.
 #
 #   docker compose -f docker-compose.prod.yml up -d --build
 # ═══════════════════════════════════════════════════════════════════════════
 
 services:
-  db:
+  soccerdb:
     image: postgres:16-alpine
     restart: always
     environment:
@@ -28,7 +33,7 @@ services:
     networks:
       - soccer_internal
 
-  web:
+  soccerweb:
     build:
       context: .
       dockerfile: Dockerfile
@@ -39,7 +44,7 @@ services:
     expose:
       - "3000"                   # reachable by the shared nginx, NOT the host
     depends_on:
-      db:
+      soccerdb:
         condition: service_healthy
     volumes:
       - storage_data:/app/storage
