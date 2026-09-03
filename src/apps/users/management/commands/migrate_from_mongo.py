@@ -64,7 +64,15 @@ class Command(BaseCommand):
         except ImportError as exc:
             raise CommandError("pymongo is required: pip install pymongo") from exc
 
-        db = MongoClient(uri).get_default_database()
+        # Resolve the source DB. The production URI has no DB in its path and
+        # Mongoose defaulted to "test", so fall back to MONGODB_DB (default
+        # "test") when the URI carries no default database.
+        client = MongoClient(uri)
+        try:
+            db = client.get_default_database()
+        except Exception:
+            db = client[os.environ.get("MONGODB_DB", "test")]
+        self.stdout.write(f"Source Mongo database: {db.name}")
 
         if options["flush"]:
             for model in (ConnectionRequest, Performance, Event, Team, AgeGroup, User, Club):
