@@ -95,9 +95,11 @@ Run **once**, into the fresh DB, before real traffic:
 
 ```bash
 cd $VPS_APP_DIR
+# NOTE: --entrypoint python bypasses the gunicorn entrypoint so the mgmt
+# command actually runs. The prod Mongo DB is "test" (append it to the URI).
 docker compose -f docker-compose.prod.yml run --rm \
-  -e MONGODB_URI="<your production mongo URI>" \
-  soccerweb python manage.py migrate_from_mongo --flush
+  -e MONGODB_URI="<your production mongo URI>/test" \
+  --entrypoint python soccerweb manage.py migrate_from_mongo --flush
 ```
 
 Preserves every `_id`, keeps bcrypt logins working, and is safe to re-run
