@@ -1,0 +1,24 @@
+# ── Core ────────────────────────────────────────────────────────────────────
+Django==5.2.1
+django-environ
+
+# ── Auth & Security ─────────────────────────────────────────────────────────
+# bcrypt: required to verify the EXISTING NestJS-generated password hashes
+# (COMPATIBILITY: users must keep logging in after the framework change).
+bcrypt
+djangorestframework-simplejwt
+PyJWT
+
+# ── Database ────────────────────────────────────────────────────────────────
+psycopg2-binary
+
+# ── REST API ────────────────────────────────────────────────────────────────
+djangorestframework
+django-cors-headers
+django-filter
+
+# ── Media ───────────────────────────────────────────────────────────────────
+Pillow
+
+# ── Data migration (read the existing Mongo source during the one-time port) ──
+pymongo

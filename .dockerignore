@@ -1,0 +1,13 @@
+.git
+.gitignore
+venv/
+.venv/
+**/__pycache__/
+*.pyc
+src/.env
+.env
+*.md
+docker-compose.dev.yml
+src/media/
+src/staticfiles/
+src/storage/*

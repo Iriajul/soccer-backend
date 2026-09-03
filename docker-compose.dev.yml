@@ -1,0 +1,42 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# LOCAL DEVELOPMENT ONLY
+# Runs PostgreSQL in Docker, exposed to localhost. Django runs on your machine
+# normally (python manage.py runserver).
+#
+# This backend (a port of the NestJS Soccer Club API) needs only PostgreSQL —
+# there is no Redis/Celery/Kafka in the original service, so none here.
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up -d
+#   cd src && python manage.py migrate
+#   cd src && python manage.py runserver 3000
+#
+# Matches .env.example:
+#   POSTGRES_HOST=127.0.0.1
+#   POSTGRES_PORT=5432
+#   POSTGRES_DB=soccer  POSTGRES_USER=soccer  POSTGRES_PASSWORD=soccer
+# ═══════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── PostgreSQL ─────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5434:5432"     # host 5434 → container 5432 (host 5432 is often taken)
+    environment:
+      POSTGRES_DB:       soccer
+      POSTGRES_USER:     soccer
+      POSTGRES_PASSWORD: soccer
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U soccer"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+
+volumes:
+  postgres_dev_data:
