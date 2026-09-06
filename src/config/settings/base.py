@@ -149,7 +149,11 @@ EMAIL_HOST = env("EMAIL_HOST", default="")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_HOST_USER = env("EMAIL_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_PASSWORD", default="")
-EMAIL_USE_TLS = False  # NestJS uses secure:false on non-465 ports.
+# NestJS's nodemailer (secure:false) auto-upgrades to STARTTLS on port 587;
+# Django's SMTP backend does NOT, so enable it explicitly. STARTTLS on 587,
+# implicit SSL on 465 — overridable via env.
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=(EMAIL_PORT == 587))
+EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=(EMAIL_PORT == 465))
 
 # ── Super admin bootstrap (mirrors UsersService.onModuleInit) ───────────────────
 SUPER_ADMIN_EMAIL = env("SUPER_ADMIN_EMAIL", default="admin@soccer.com")
