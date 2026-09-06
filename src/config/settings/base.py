@@ -173,6 +173,11 @@ STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
 
+# After admin login, land on the admin index (not Django's default
+# /accounts/profile/, which doesn't exist here).
+LOGIN_REDIRECT_URL = "/admin/"
+LOGIN_URL = "/admin/login/"
+
 # ── CSRF / proxy (for the admin behind nginx over HTTPS) ────────────────────────
 # Django must trust the HTTPS origin for admin form POSTs, and must know the
 # request is HTTPS (nginx terminates TLS and forwards X-Forwarded-Proto).
