@@ -173,13 +173,65 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ── Jazzmin admin UI ───────────────────────────────────────────────────────────
+# ── Jazzmin admin UI (styled to match the Athlon-go admin) ──────────────────────
 JAZZMIN_SETTINGS = {
     "site_title": "Soccer Club Admin",
     "site_header": "Soccer Club",
     "site_brand": "Soccer Club",
-    "welcome_sign": "Soccer Club Management — Admin",
+    "welcome_sign": "Welcome to Soccer Club Admin",
     "copyright": "Soccer Club",
     "search_model": ["users.User", "clubs.Club"],
+    "topmenu_links": [{"name": "Home", "url": "admin:index"}],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "related_modal_active": True,
     "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.Group": "fas fa-users",
+        "users.User": "fas fa-user",
+        "clubs.Club": "fas fa-shield-alt",
+        "age_groups.AgeGroup": "fas fa-layer-group",
+        "teams.Team": "fas fa-futbol",
+        "events.Event": "fas fa-calendar-day",
+        "performance.Performance": "fas fa-chart-line",
+        "connections.ConnectionRequest": "fas fa-link",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "use_google_fonts_cdn": True,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": False,
+    "accent": "accent-primary",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "lux",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
+    },
+    "actions_sticky_top": True,
 }
