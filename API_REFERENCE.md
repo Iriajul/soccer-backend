@@ -116,6 +116,23 @@ Completes first login using the `resetToken` from the 403 above.
 Creates a staff/user account, emails a temp password. Caller must outrank the
 new role (strictly higher weight). Non-super-admins can only invite into their
 own club.
+
+**Who can invite whom** (role weights — you may invite any role with a *strictly
+lower* weight):
+
+| Caller | Can invite |
+|---|---|
+| `SUPER_ADMIN` (100) | anyone |
+| `CLUB_OWNER` (90) | TECH_DIRECTOR, COORDINATOR, COACH, PLAYER, PARENT |
+| `TECH_DIRECTOR` (80) | COORDINATOR, COACH, PLAYER, PARENT |
+| `COORDINATOR` (70) | COACH, PLAYER, PARENT |
+| `COACH` (60) | **PLAYER, PARENT** |
+| `PLAYER` / `PARENT` (50) | nobody |
+
+> So a **coach can invite/add PLAYER and PARENT accounts** (but not another coach
+> or higher). The invited user receives the temp-password email and completes the
+> first-login flow to set their own password.
+
 **Body**
 ```json
 { "name": "John Doe", "email": "john@example.com", "role": "COACH", "clubId": "6a71…" }
@@ -351,6 +368,30 @@ Creates or replaces a player's 5 ratings (all required, 0–100).
 ---
 
 ## 8. Connections (`/connections`) — parent ↔ player linking. All require auth.
+
+**How linking works (state machine):** a request links one PARENT to one PLAYER
+(same club only). The initial status depends on **who initiates**:
+
+| Initiator | Initial status | Then who approves |
+|---|---|---|
+| The **parent** (for themselves) | `WAITING_ON_CHILD` | the child/player approves → `APPROVED` |
+| The **player/child** (for themselves) | `WAITING_ON_PARENT` | the parent approves → `APPROVED` |
+| **Staff** (e.g. a **coach**/admin) | `PENDING` | **both** parent and child approve → `APPROVED` |
+
+So a **coach can initiate a parent↔child link**, but it only becomes active once
+**both the parent and the child approve** (`PATCH /connections/:id/approve`).
+`PATCH /connections/:id/reject` sets it to `REJECTED`.
+
+**On full approval**, the child's id is added to the parent's `childPlayerIds` and
+the parent's id to the child's `parentIds`. A parent can be linked to **multiple
+children**.
+
+**Parent tracking their kids' evaluation:** once linked, a parent uses
+`GET /connections/my-children` (each child with their **performance ratings**,
+team, and upcoming schedule) or `GET /performance/:playerId` (allowed only for
+their own children). "Evaluation" = the 5 performance ratings (passing,
+dribbling, shooting, defense, stamina); it is a single current snapshot per
+player (no history).
 
 ### POST /connections/request
 **Body** `{ "parentId": "6a71…", "childId": "6a71…" }`
