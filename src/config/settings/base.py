@@ -58,12 +58,18 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise serves /static/ (Jazzmin admin assets) straight from gunicorn,
+    # so the admin is styled without any nginx /static/ rule. Must sit right
+    # after SecurityMiddleware.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    # NOTE: CSRF middleware intentionally omitted — the NestJS API is a
-    # stateless JWT API with no CSRF protection; adding it would reject the
-    # existing clients' requests.
+    # CSRF is required by the Django/Jazzmin admin's login + change forms.
+    # It does NOT affect the JWT API: every DRF APIView is csrf_exempt by
+    # default (we use only JWT auth, never SessionAuthentication), so API
+    # clients are unaffected. The root hello view is csrf_exempt too.
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -159,6 +165,21 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(SRC_DIR, "staticfiles")
 STATICFILES_DIRS = [STATIC_DIR] if os.path.isdir(STATIC_DIR) else []
+# WhiteNoise storage: compressed, no manifest (manifest is strict and 500s if
+# any referenced asset is missing — the admin's own CSS occasionally references
+# optional files, so we avoid the manifest variant).
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+
+# ── CSRF / proxy (for the admin behind nginx over HTTPS) ────────────────────────
+# Django must trust the HTTPS origin for admin form POSTs, and must know the
+# request is HTTPS (nginx terminates TLS and forwards X-Forwarded-Proto).
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{h}" for h in ALLOWED_HOSTS if h not in ("127.0.0.1", "localhost", "*")
+]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = MEDIA_DIR

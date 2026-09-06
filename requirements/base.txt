@@ -19,6 +19,8 @@ django-filter
 
 # ── Admin UI ────────────────────────────────────────────────────────────────
 django-jazzmin
+# Serves the admin's static assets from gunicorn (no nginx /static/ rule needed).
+whitenoise
 
 # ── Media ───────────────────────────────────────────────────────────────────
 Pillow
