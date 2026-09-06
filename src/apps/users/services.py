@@ -238,13 +238,24 @@ def update_role(target_user_id, new_role, updater):
 
 
 def bootstrap_super_admin():
-    """Mirror of UsersService.onModuleInit."""
+    """Mirror of UsersService.onModuleInit.
+
+    Also ensures every SUPER_ADMIN can access the Django/Jazzmin admin by
+    granting is_staff/is_superuser (idempotent — safe to run each deploy).
+    """
+    # Promote any existing SUPER_ADMINs to admin-panel access.
+    promoted = User.objects.filter(role=UserRole.SUPER_ADMIN).exclude(
+        is_staff=True, is_superuser=True
+    ).update(is_staff=True, is_superuser=True)
+    if promoted:
+        logger.info("Granted admin access to %s existing SUPER_ADMIN(s).", promoted)
+
     if User.objects.filter(role=UserRole.SUPER_ADMIN).exists():
         return None
     email = settings.SUPER_ADMIN_EMAIL
     password = settings.SUPER_ADMIN_PASSWORD
     user = User(name="System Admin", email=email, role=UserRole.SUPER_ADMIN,
-                is_first_login=False)
+                is_first_login=False, is_staff=True, is_superuser=True)
     user.password = hash_password(password)
     user.save()
     logger.info(

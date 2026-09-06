@@ -10,6 +10,7 @@ childPlayerIds, parentIds, createdAt, updatedAt. `password` is never exposed.
 non-symmetrical M2M fields rather than one reverse relation.
 """
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
@@ -32,10 +33,12 @@ class UserManager(BaseUserManager):
         extra.setdefault("role", UserRole.SUPER_ADMIN)
         extra.setdefault("name", "System Admin")
         extra.setdefault("is_first_login", False)
+        extra.setdefault("is_staff", True)
+        extra.setdefault("is_superuser", True)
         return self.create_user(email, password, **extra)
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     id = ObjectIdField(primary_key=True)
 
     name = models.CharField(max_length=255)
@@ -72,6 +75,8 @@ class User(AbstractBaseUser):
     )
 
     is_active = models.BooleanField(default=True)
+    # For the Django/Jazzmin admin only — never exposed by the API serializers.
+    is_staff = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

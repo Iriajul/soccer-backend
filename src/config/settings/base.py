@@ -33,6 +33,7 @@ NODE_ENV = env("NODE_ENV", default="development")
 
 # ── Applications ──────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
+    "jazzmin",  # must precede django.contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -171,3 +172,14 @@ STORAGE_ROOT = STORAGE_DIR
 CORS_ALLOW_ALL_ORIGINS = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ── Jazzmin admin UI ───────────────────────────────────────────────────────────
+JAZZMIN_SETTINGS = {
+    "site_title": "Soccer Club Admin",
+    "site_header": "Soccer Club",
+    "site_brand": "Soccer Club",
+    "welcome_sign": "Soccer Club Management — Admin",
+    "copyright": "Soccer Club",
+    "search_model": ["users.User", "clubs.Club"],
+    "show_ui_builder": False,
+}

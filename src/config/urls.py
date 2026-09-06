@@ -24,7 +24,7 @@ from common.views import root_hello
 
 urlpatterns = [
     path("", root_hello, name="root-hello"),        # GET /  (public hello)
-    path("django-admin/", admin.site.urls),         # not part of the API contract
+    path("admin/", admin.site.urls),                # Jazzmin admin UI (internal, not part of the client API)
 
     path("", include("apps.authentication.urls")),  # /auth/*
     path("", include("apps.users.urls")),           # /users/*

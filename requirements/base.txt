@@ -17,6 +17,9 @@ djangorestframework
 django-cors-headers
 django-filter
 
+# ── Admin UI ────────────────────────────────────────────────────────────────
+django-jazzmin
+
 # ── Media ───────────────────────────────────────────────────────────────────
 Pillow
 
